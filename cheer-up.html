@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Little Sunshine for You</title>
+    <style>
+        :root {
+            --bg-color: #FFFDE7;
+            --accent-color: #FBC02D;
+            --text-color: #5D4037;
+            --highlight: #E65100;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            cursor: pointer;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 4px solid var(--accent-color);
+            max-width: 85%;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            color: var(--highlight);
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+        }
+
+        #reason-text {
+            color: var(--text-color);
+            font-size: 1.4rem;
+            font-weight: bold;
+            min-height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="card">
+        <h1>Keep Shining! ☀️</h1>
+        <div id="reason-text">Click to see why you're amazing...</div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const reasonDisplay = document.getElementById('reason-text');
+        
+        // --- CUSTOMIZE YOUR REASONS HERE ---
+        const reasons = [
+            "Your smile literally lights up the room.",
+            "You are stronger than you give yourself credit for.",
+            "I love the way you think about the world.",
+            "You make everything more fun just by being there.",
+            "Your kindness is your superpower.",
+            "I'm so incredibly proud of you.",
+            "You’ve got this, no matter what!",
+            "You are my favorite person to talk to."
+        ];
+        
+        let reasonIndex = 0;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 12,
+                    y: (Math.random() - 0.5) * 12
+                };
+                this.alpha = 1;
+                this.friction = 0.95;
+                this.gravity = 0.2;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.velocity.y += this.gravity;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.015;
+            }
+        }
+
+        function handleAction(x, y) {
+            // Spawn Fireworks
+            const colors = ['#FFD700', '#FFEA00', '#FFAB00', '#FF6D00'];
+            for (let i = 0; i < 40; i++) {
+                particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+            }
+
+            // Update Text
+            reasonDisplay.style.opacity = 0;
+            setTimeout(() => {
+                reasonDisplay.innerText = reasons[reasonIndex];
+                reasonDisplay.style.opacity = 1;
+                reasonIndex = (reasonIndex + 1) % reasons.length;
+            }, 200);
+        }
+
+        document.body.addEventListener('mousedown', (e) => handleAction(e.clientX, e.clientY));
+        document.body.addEventListener('touchstart', (e) => handleAction(e.touches[0].clientX, e.touches[0].clientY));
+
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.fillStyle = 'rgba(255, 253, 231, 0.3)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, i) => {
+                if (particle.alpha > 0) {
+                    particle.update();
+                    particle.draw();
+                } else {
+                    particles.splice(i, 1);
+                }
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        animate();
+    </script>
+</body>
+</html>
+
